@@ -7,7 +7,7 @@ export default function ProfilePage() {
   return (
     <PageShell
       title="Your profile"
-      description="Info, role and skills from the graph. Set NEXT_PUBLIC_DEFAULT_DEVELOPER_ID in frontend/.env.local."
+      description="Your role, location and skills from the graph."
     >
       <ProfileContent developerId={DEVELOPER_ID} />
     </PageShell>
