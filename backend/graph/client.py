@@ -68,7 +68,18 @@ class CognoDBClient:
     @staticmethod
     def _tx_func(tx, query, parameters):
         result = tx.run(query, parameters)
-        return [record.data() for record in result]
+        try:
+            return [record.data() for record in result]
+        except ValueError as e:
+            # CognoDB v0.9.11 can return empty-key records for MERGE without RETURN
+            if "keys and values have different length" in str(e):
+                # consume the result and return empty for write queries
+                try:
+                    result.consume()
+                except Exception:
+                    pass
+                return []
+            raise
 
     def ping(self):
         """Health check query to verify database is responsive."""
