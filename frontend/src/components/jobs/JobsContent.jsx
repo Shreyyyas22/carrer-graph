@@ -23,20 +23,22 @@ export default function JobsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [search, setSearch] = useState("");
+  const [inputValue, setInputValue] = useState("");
+  const [search, setSearch] = useState(""); // debounced, 2+ chars or empty
   const [role, setRole] = useState("");
   const [location, setLocation] = useState("");
-  const [remote, setRemote] = useState(""); // "", "true", "false"
+  const [remote, setRemote] = useState("");
   const [level, setLevel] = useState("");
   const [skill, setSkill] = useState("");
   const [industry, setIndustry] = useState("");
 
   const hasActiveFilters = useMemo(
-    () => Boolean(search || role || location || remote || level || skill || industry),
-    [search, role, location, remote, level, skill, industry]
+    () => Boolean(search || role || location || remote || level || skill || industry || inputValue.trim()),
+    [search, role, location, remote, level, skill, industry, inputValue]
   );
 
   const clearFilters = () => {
+    setInputValue("");
     setSearch("");
     setRole("");
     setLocation("");
@@ -45,6 +47,20 @@ export default function JobsContent() {
     setSkill("");
     setIndustry("");
   };
+
+  const commitSearch = useCallback(() => {
+    const v = inputValue.trim();
+    if (v.length > 0 && v.length < 2) return; // keep 1-char as draft, don't fetch
+    setSearch(v);
+  }, [inputValue]);
+
+  // debounce input → search (500ms) but only for 2+ chars or clear
+  useEffect(() => {
+    const v = inputValue.trim();
+    if (v.length > 0 && v.length < 2) return; // wait for 2nd char
+    const t = setTimeout(() => setSearch(v), 500);
+    return () => clearTimeout(t);
+  }, [inputValue]);
 
   const fetchOptions = useCallback(async () => {
     try {
@@ -61,7 +77,7 @@ export default function JobsContent() {
         skills: (Array.isArray(skills) ? skills : []).map((s) => s.skill ?? s),
       });
     } catch {
-      // filter options are best-effort; don't block the page
+      // filter options are best-effort
     }
   }, []);
 
@@ -109,21 +125,54 @@ export default function JobsContent() {
   }
 
   const showMatch = Boolean(DEFAULT_DEVELOPER_ID) && jobs.length > 0 && jobs[0].match_percentage != null;
+  const showMinCharsHint = inputValue.trim().length > 0 && inputValue.trim().length < 2;
 
   return (
     <div className="space-y-6">
       <Card className="p-4">
         <div className="flex flex-col gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search title or description…"
-              className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
-            />
+          {/* Search: input + Search button, Enter to commit, 2-char minimum */}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") commitSearch();
+                  if (e.key === "Escape") {
+                    setInputValue("");
+                    setSearch("");
+                  }
+                }}
+                placeholder="Search title or description… (min 2 chars)"
+                className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-9 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              />
+              {inputValue && (
+                <button
+                  type="button"
+                  aria-label="Clear search"
+                  onClick={() => {
+                    setInputValue("");
+                    setSearch("");
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={commitSearch}
+              className="shrink-0 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            >
+              Search
+            </button>
           </div>
+          {showMinCharsHint && (
+            <p className="text-xs text-amber-600">Type at least 2 characters, then press Enter or Search.</p>
+          )}
 
           {/* Filters row */}
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
@@ -230,7 +279,7 @@ export default function JobsContent() {
       ) : (
         <>
           <p className="text-sm text-gray-500">
-            {jobs.length} job{jobs.length === 1 ? "" : "s"} found
+            {jobs.length} job{jobs.length === 1 ? "" : "s"} found{search ? ` for “${search}”` : ""}
           </p>
           <ul className="space-y-3">
             {jobs.map((row) => {
