@@ -2,7 +2,7 @@
 
 A graph-first career platform: **Next.js → Django REST Framework → Neo4j driver → CognoDB (openCypher/Bolt)**, where *connections* are the query. Search jobs by skill overlap, see what you’re missing for any role with learning resources attached to skills, explore company → industry → tech, and trace career paths that are natural graph traversals.
 
-**Live demo:** `https://carrer-graph-lfiv.vercel.app` · **API:** `https://carrer-graph.onrender.com/api/health` · **Recording:** `docs/demo.mp4`
+**Live demo:** `https://carrer-graph-lfiv.vercel.app` · **API:** `https://carrer-graph.onrender.com/api/health` · **Recording:** `https://www.loom.com/share/09005ffa478049a9b88573b30bc3d4da`
 
 ---
 
