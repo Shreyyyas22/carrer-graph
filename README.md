@@ -2,7 +2,7 @@
 
 A graph-first career platform: **Next.js → Django REST Framework → Neo4j driver → CognoDB (openCypher/Bolt)**, where *connections* are the query. Search jobs by skill overlap, see what you’re missing for any role with learning resources attached to skills, explore company → industry → tech, and trace career paths that are natural graph traversals.
 
-**Live demo:** `https://careergraph-…vercel.app` · **API:** `https://careergraph-…onrender.com/api/health` · **Recording:** `docs/demo.mp4`
+**Live demo:** `https://carrer-graph-lfiv.vercel.app` · **API:** `https://carrer-graph.onrender.com/api/health` · **Recording:** `docs/demo.mp4`
 
 ---
 
@@ -97,9 +97,9 @@ All pages use skeletons on first load, actionable `EmptyState`, and `ErrorState`
 
 ## 5. Deploy
 
-- Backend: Render/Railway → env vars above + `GET /api/health` green + keep CORS for `https://<vercel>.vercel.app`.
-- Frontend: Vercel → `NEXT_PUBLIC_API_URL=https://<backend>/` + `NEXT_PUBLIC_DEFAULT_DEVELOPER_ID`.
-- Run full click-through on the live URL (dashboard → jobs → job detail → graph with `Python`).
+- **Backend:** `https://carrer-graph.onrender.com` (Render, `backend/` · `gunicorn config.wsgi:application`) — `GET /api/health → {"status":"healthy"}` with `bolt+s://db-2bf16aa4.bravo.databases.cognodb.com` (c0, `us-east4`). Env: `COGNODB_URI/USERNAME/PASSWORD`, `SECRET_KEY`, `CORS_ALLOWED_ORIGINS=https://carrer-graph-lfiv.vercel.app,http://localhost:3000,http://localhost:3001`, `ALLOWED_HOSTS=.onrender.com`.
+- **Frontend:** `https://carrer-graph-lfiv.vercel.app` (Vercel, `frontend/` · `next@15.5.23`) — `NEXT_PUBLIC_API_URL=https://carrer-graph.onrender.com`, `NEXT_PUBLIC_DEFAULT_DEVELOPER_ID=24e29a26-15ff-437b-92f5-5ba979467123` (Alice).
+- Run full click-through on the live URL (dashboard → jobs → job detail → graph with `Python`). Keep the c0 instance running until Wexa replies.
 
 ---
 
